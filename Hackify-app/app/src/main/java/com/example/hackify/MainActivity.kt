@@ -151,22 +151,33 @@ class MainActivity : Activity() {
     // Receber mensagem do ESP32
 // Essa função agora retorna um Job (coroutine) e não mais um valor diretamente
     private suspend fun receiveMessage(): String {
-        return try {
+        val buffer = ByteArray(1024)
+        val receivedData = StringBuilder()
+
+        try {
             if (bluetoothSocket != null && bluetoothSocket!!.isConnected) {
                 val inputStream: InputStream = bluetoothSocket!!.inputStream
-                val buffer = ByteArray(1024)
-                val bytes = inputStream.read(buffer)
-                val message = String(buffer, 0, bytes)
-                Log.i(TAG, "Mensagem recebida: $message")
-                message
+
+                while (true) {
+                    val bytes = inputStream.read(buffer)
+                    val message = String(buffer, 0, bytes)
+                    receivedData.append(message)
+
+                    if (message.contains("FIM")) {
+                        break
+                    }
+                }
+
+                return receivedData.toString().replace("FIM", "").trim()
             } else {
-                "Bluetooth não conectado!"
+                return "Bluetooth não conectado!"
             }
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao receber mensagem: ${e.message}")
-            "Erro ao receber mensagem"
+            return "Erro ao receber mensagem"
         }
     }
+
 
 
     // Acessar a última localização conhecida
@@ -186,7 +197,7 @@ class MainActivity : Activity() {
                 if (location != null) {
                     val latitude = location.latitude
                     val longitude = location.longitude
-                    Log.i(TAG, "Localização: Latitude $latitude, Longitude $longitude")
+                    //Log.i(TAG, "Localização: Latitude $latitude, Longitude $longitude")
                 }
             }
     }
