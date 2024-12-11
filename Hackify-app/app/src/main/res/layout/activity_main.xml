@@ -8,18 +8,19 @@
     tools:context=".MainActivity">
 
     <!-- Botão para enviar mensagem ao ESP32 -->
+
+    <!-- Texto para mostrar a resposta do ESP32 -->
+
     <Button
         android:id="@+id/buttonSend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Enviar"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="50dp"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTimer" />
 
-    <!-- Texto para mostrar a resposta do ESP32 -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -36,6 +37,28 @@
             android:textSize="18sp"
             android:scrollbars="vertical"/>
     </ScrollView>
+
+
+    <!-- Botão para reconectar -->
+    <Button
+        android:id="@+id/buttonReconnect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reconectar ao ESP32"
+        android:layout_marginBottom="16dp"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/textViewTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewResponse"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonReconnect"
+        tools:ignore="MissingConstraints,NotSibling" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

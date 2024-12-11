@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
@@ -37,6 +38,13 @@ class MainActivity : Activity() {
     private val BLUETOOTH_PERMISSION_REQUEST_CODE = 101
     private val LOCATION_PERMISSION_REQUEST_CODE = 100
 
+    private lateinit var buttonSend: Button
+    private lateinit var buttonReconnect: Button
+    private lateinit var textViewResponse: TextView
+    private lateinit var textViewTimer: TextView
+
+    private var isReconnecting = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -44,30 +52,43 @@ class MainActivity : Activity() {
         // Inicializar o provedor de localização
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // Botão para enviar mensagem ao ESP32
-        val buttonSend = findViewById<Button>(R.id.buttonSend)
-        val textViewResponse = findViewById<TextView>(R.id.textViewResponse)
+        // Inicializando os botões e o temporizador
+        buttonSend = findViewById(R.id.buttonSend)
+        buttonReconnect = findViewById(R.id.buttonReconnect)
+        textViewResponse = findViewById(R.id.textViewResponse)
+        textViewTimer = findViewById(R.id.textViewTimer)
 
         // Verificar permissões de Bluetooth e localização
         checkBluetoothPermissions()
         checkLocationPermissions()
 
+        // Quando o botão "Enviar" é pressionado, envia a mensagem
         buttonSend.setOnClickListener {
-            // Envia a mensagem ao ESP32
-            sendMessage("Olá ESP32!")
+            if (bluetoothSocket != null && bluetoothSocket!!.isConnected) {
+                sendMessage("Olá ESP32!")
 
-            // Inicia a tarefa de receber a resposta na thread de fundo
-            CoroutineScope(Dispatchers.Main).launch {
-                val response = withContext(Dispatchers.IO) {
-                    // Chama a função de receber a mensagem, que ocorre em uma thread de fundo
-                    receiveMessage()
+                // Inicia a tarefa de receber a resposta
+                CoroutineScope(Dispatchers.Main).launch {
+                    val response = withContext(Dispatchers.IO) {
+                        // Chama a função de receber a mensagem
+                        receiveMessage()
+                    }
+                    // Atualiza o TextView com a resposta
+                    textViewResponse.text = response
                 }
-                // Atualiza o TextView com a resposta recebida
-                textViewResponse.text = response
+            } else {
+                // Caso o Bluetooth não esteja conectado, exibe uma mensagem de erro
+                textViewResponse.text = "Bluetooth não está conectado!"
+            }
+        }
+
+        // Quando o botão "Reconectar" é pressionado, tenta reconectar com o ESP32
+        buttonReconnect.setOnClickListener {
+            if (!isReconnecting) {
+                startReconnectionProcess()
             }
         }
     }
-
 
     // Verificação de permissões de Bluetooth
     private fun checkBluetoothPermissions() {
@@ -87,26 +108,6 @@ class MainActivity : Activity() {
             }
         } else {
             initBluetooth()
-        }
-    }
-
-    // Verificação de permissões de localização
-    private fun checkLocationPermissions() {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
-            } else {
-                accessLocation()
-            }
-        } else {
-            Log.i(TAG, "Permissões de localização não são necessárias no Android 12+")
         }
     }
 
@@ -132,7 +133,7 @@ class MainActivity : Activity() {
         }
     }
 
-    // Enviar mensagem ao ESP32
+    // Função que envia a mensagem para o ESP32
     private fun sendMessage(message: String) {
         try {
             if (bluetoothSocket != null && bluetoothSocket!!.isConnected) {
@@ -148,8 +149,7 @@ class MainActivity : Activity() {
         }
     }
 
-    // Receber mensagem do ESP32
-// Essa função agora retorna um Job (coroutine) e não mais um valor diretamente
+    // Função para receber a mensagem do ESP32
     private suspend fun receiveMessage(): String {
         val buffer = ByteArray(1024)
         val receivedData = StringBuilder()
@@ -178,9 +178,51 @@ class MainActivity : Activity() {
         }
     }
 
+    // Função para iniciar o processo de reconexão com temporizador
+    private fun startReconnectionProcess() {
+        isReconnecting = true
+        buttonReconnect.isEnabled = false // Desabilita o botão enquanto reconecta
+        var timeRemaining = 10 // Tempo de espera em segundos (10 segundos, por exemplo)
 
+        val handler = Handler()
+        val runnable = object : Runnable {
+            override fun run() {
+                if (timeRemaining > 0) {
+                    textViewTimer.text = "A reconexão será feita em: $timeRemaining segundos"
+                    timeRemaining--
+                    handler.postDelayed(this, 1000)
+                } else {
+                    textViewTimer.text = "Pronto para enviar!"
+                    buttonReconnect.isEnabled = true // Habilita o botão novamente
+                    isReconnecting = false
+                    connectToESP32() // Tenta reconectar com o ESP32 após o temporizador
+                }
+            }
+        }
+        handler.post(runnable)
+    }
 
-    // Acessar a última localização conhecida
+    // Verificação de permissões de localização
+    private fun checkLocationPermissions() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
+            } else {
+                accessLocation()
+            }
+        } else {
+            Log.i(TAG, "Permissões de localização não são necessárias no Android 12+")
+        }
+    }
+
+    // Função para acessar a localização (caso necessário)
     private fun accessLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -197,7 +239,7 @@ class MainActivity : Activity() {
                 if (location != null) {
                     val latitude = location.latitude
                     val longitude = location.longitude
-                    //Log.i(TAG, "Localização: Latitude $latitude, Longitude $longitude")
+                    // Log.i(TAG, "Localização: Latitude $latitude, Longitude $longitude")
                 }
             }
     }
