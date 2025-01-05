@@ -57,6 +57,7 @@ class MainActivity : Activity() {
         textViewTimer = findViewById(R.id.textViewTimer)
 
         buttonReconnect.visibility = View.GONE // Botão inicialmente invisível
+        textViewTimer.visibility = View.GONE
 
         checkBluetoothPermissions()
         checkLocationPermissions()
