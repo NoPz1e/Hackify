@@ -7,6 +7,6 @@ plugins {
 // Se precisar incluir dependências para o próprio Gradle (buildscript):
 buildscript {
     dependencies {
-        classpath("com.android.tools.build:gradle:8.1.1") // Certifique-se de usar a sintaxe Kotlin
+        classpath("com.android.tools.build:gradle:8.5.0") // Certifique-se de usar a sintaxe Kotlin
     }
 }
