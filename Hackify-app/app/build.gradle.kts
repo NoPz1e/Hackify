@@ -62,6 +62,9 @@ dependencies {
     // Adicione essa linha para incluir o ConstraintLayout
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.google.android.material:material:1.6.0") // Use a versão mais recente
+    implementation("androidx.appcompat:appcompat:1.6.1")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

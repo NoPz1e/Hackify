@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,10 +7,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- Botão para enviar mensagem ao ESP32 -->
+    <!-- Container para os fragments -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_navigation" />
 
     <!-- Texto para mostrar a resposta do ESP32 -->
-
     <Button
         android:id="@+id/buttonSend"
         android:layout_width="wrap_content"
@@ -38,7 +42,6 @@
             android:scrollbars="vertical"/>
     </ScrollView>
 
-
     <!-- Botão para reconectar -->
     <Button
         android:id="@+id/buttonReconnect"
@@ -60,5 +63,14 @@
         app:layout_constraintTop_toBottomOf="@+id/buttonReconnect"
         tools:ignore="MissingConstraints,NotSibling" />
 
+    <!-- Barra de navegação inferior -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@color/black"
+        app:itemTextColor="@color/white" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>
