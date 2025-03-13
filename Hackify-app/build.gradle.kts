@@ -9,4 +9,5 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle:8.5.0") // Certifique-se de usar a sintaxe Kotlin
     }
+
 }

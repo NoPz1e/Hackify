@@ -84,6 +84,7 @@ class MainActivity : AppCompatActivity() {
                     return@launch
                 }
 
+
                 bluetoothSocket = device.createRfcommSocketToServiceRecord(UUID_BT)
 
                 withTimeout(10000) {
@@ -103,6 +104,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
 
     fun sendMessageToESP32(message: String, callback: (String) -> Unit) {
         if (bluetoothSocket != null && bluetoothSocket!!.isConnected) {

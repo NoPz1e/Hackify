@@ -43,6 +43,7 @@ class HomeFragment : Fragment() {
         // Adiciona um Log para verificar se o Fragment está carregando
         Log.d("HomeFragment", "Fragment carregado com sucesso!")
 
+
         // Configura o botão para enviar mensagem
         buttonSend.setOnClickListener { sendMessage() }
     }

@@ -39,6 +39,7 @@
     </ScrollView>
 
 
+
     <!-- Botão para reconectar -->
     <Button
         android:id="@+id/buttonReconnect"
