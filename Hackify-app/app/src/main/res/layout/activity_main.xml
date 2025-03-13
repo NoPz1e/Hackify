@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,40 +7,58 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- Botão para reconectar ao ESP32 -->
+    <!-- Botão para enviar mensagem ao ESP32 -->
+
+    <!-- Texto para mostrar a resposta do ESP32 -->
+
+    <Button
+        android:id="@+id/buttonSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Enviar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTimer" />
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/buttonSend"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:id="@+id/textViewResponse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Resposta do ESP32 aparecerá aqui"
+            android:textSize="18sp"
+            android:scrollbars="vertical"/>
+    </ScrollView>
+
+
+    <!-- Botão para reconectar -->
     <Button
         android:id="@+id/buttonReconnect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Reconectar ao ESP32"
-        android:layout_alignParentTop="true" />
+        android:layout_marginBottom="16dp"
+        tools:ignore="MissingConstraints" />
 
-    <!-- TextView de Status -->
     <TextView
-        android:id="@+id/textViewStatus"
+        android:id="@+id/textViewTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Status"
-        android:layout_below="@id/buttonReconnect"
+        android:layout_below="@id/textViewResponse"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp" />
-
-    <!-- Container para os fragments -->
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/textViewStatus"
-        android:layout_above="@id/bottom_navigation"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonReconnect"
+        tools:ignore="MissingConstraints,NotSibling" />
 
 
-    <!-- Barra de navegação inferior -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:menu="@menu/bottom_nav_menu" />
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
