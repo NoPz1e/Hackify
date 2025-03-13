@@ -7,10 +7,10 @@
       </SelectionState>
       <SelectionState runConfigName="Hackify">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-02-20T14:38:13.961850734Z">
+        <DropdownSelection timestamp="2025-03-13T11:45:46.689033423Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=3fe7d7aa" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/home/nopz1e/.android/avd/New_Device_API_29.avd" />
             </handle>
           </Target>
         </DropdownSelection>

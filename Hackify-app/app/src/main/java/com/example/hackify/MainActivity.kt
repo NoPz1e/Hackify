@@ -11,7 +11,8 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.example.hackify.R
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.io.InputStream
@@ -44,15 +45,27 @@ class MainActivity : AppCompatActivity() {
         // Configura o botão de reconectar
         buttonReconnect.setOnClickListener { reconnectToESP32() }
 
-        // Tenta conectar automaticamente ao ESP32 ao abrir o app
-        reconnectToESP32()
+        // Inicializa a navegação
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment())
-                .commit()
+            replaceFragment(HomeFragment())
         }
 
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> replaceFragment(HomeFragment())
+                R.id.nav_search -> replaceFragment(SearchFragment())
+                R.id.nav_profile -> replaceFragment(ProfileFragment())
+            }
+            true
+        }
+    }
+
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
     }
 
     private fun reconnectToESP32() {
@@ -84,7 +97,6 @@ class MainActivity : AppCompatActivity() {
                     return@launch
                 }
 
-
                 bluetoothSocket = device.createRfcommSocketToServiceRecord(UUID_BT)
 
                 withTimeout(10000) {
@@ -104,7 +116,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     fun sendMessageToESP32(message: String, callback: (String) -> Unit) {
         if (bluetoothSocket != null && bluetoothSocket!!.isConnected) {
