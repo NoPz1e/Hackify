@@ -1,6 +1,7 @@
 package com.example.hackify
 
 import android.Manifest
+import android.content.Context
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
@@ -24,7 +25,6 @@ class MainActivity : AppCompatActivity() {
 
     // Bluetooth-related
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-    private val ESP32_MAC_ADDRESS = "FC:E8:C0:76:12:3E"
     private val UUID_BT = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     private var bluetoothSocket: BluetoothSocket? = null
 
@@ -42,21 +42,26 @@ class MainActivity : AppCompatActivity() {
         buttonReconnect = findViewById(R.id.buttonReconnect)
         textViewStatus = findViewById(R.id.textViewStatus)
 
-        // Configura o botão de reconectar
-        buttonReconnect.setOnClickListener { reconnectToESP32() }
+        // Obtém o MAC do ESP32 salvo nas configurações; se não existir, usa valor padrão
+        val sharedPref = getSharedPreferences("HackifyPrefs", Context.MODE_PRIVATE)
+        val ESP32_MAC_ADDRESS = sharedPref.getString("esp_mac", "FC:E8:C0:76:12:3E") ?: "FC:E8:C0:76:12:3E"
 
-        // Inicializa a navegação
+        // Configura o botão de reconectar
+        buttonReconnect.setOnClickListener { reconnectToESP32(ESP32_MAC_ADDRESS) }
+
+        // Inicializa a navegação inferior
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         if (savedInstanceState == null) {
+            // Exibe inicialmente o HomeFragment; ajuste se necessário
             replaceFragment(HomeFragment())
         }
 
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> replaceFragment(HomeFragment())
-                R.id.nav_search -> replaceFragment(SearchFragment())
-                R.id.nav_profile -> replaceFragment(ProfileFragment())
+                // Aqui, o item de menu 'profile' agora carrega o SettingsFragment (a aba de definições)
+                R.id.nav_settings -> replaceFragment(SettingsFragment())
             }
             true
         }
@@ -68,15 +73,15 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 
-    private fun reconnectToESP32() {
+    private fun reconnectToESP32(macAddress: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            connectToESP32()
+            connectToESP32(macAddress)
         }
     }
 
-    private fun connectToESP32() {
+    private fun connectToESP32(macAddress: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(ESP32_MAC_ADDRESS)
+            val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(macAddress)
             if (device == null) {
                 Log.e(TAG, "Dispositivo Bluetooth não encontrado!")
                 updateUI("Dispositivo não encontrado!")
@@ -98,7 +103,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 bluetoothSocket = device.createRfcommSocketToServiceRecord(UUID_BT)
-
                 withTimeout(10000) {
                     Log.d(TAG, "Tentando conectar ao dispositivo: ${device.name}")
                     bluetoothSocket?.connect()
@@ -153,7 +157,6 @@ class MainActivity : AppCompatActivity() {
                         val bytes = inputStream.read(buffer)
                         val message = String(buffer, 0, bytes)
                         receivedData.append(message)
-
                         if (message.contains("FIM")) break
                     }
 
